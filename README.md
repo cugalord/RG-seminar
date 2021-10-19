@@ -1,1 +1,3 @@
 # RG-seminar
+
+Jebes zivot
