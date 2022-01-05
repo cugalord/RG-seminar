@@ -19,12 +19,16 @@ export class Raycaster {
 		}
 	}
 
-	cast(objectOrigin, isCamera = false) {
+	cast(objectOrigin, isCamera = false, id = null) {
 		// Calculate direction of ray cast - it doesn't change when resolving casts between different
 		// objects, so it needs to only be calculated once
 		const oo = objectOrigin.getGlobalTransform();
 
-		const forward = Utils.getForward(oo, isCamera);
+		let forward = Utils.getForward(oo, isCamera);
+
+		if (id == 1) {
+			vec3.negate(forward, forward);
+		}
 
 		this.scene.traverse((other) => {
 			// If nodes arent't same and node has mesh

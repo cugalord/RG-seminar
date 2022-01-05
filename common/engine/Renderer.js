@@ -17,6 +17,12 @@ export class Renderer {
         gl.enable(gl.DEPTH_TEST);
         gl.enable(gl.CULL_FACE);
         gl.cullFace(gl.BACK);
+
+        this.fogSettings = {
+            fogColor: [0.8, 0.9, 1, 1],
+            fogNear: 1.1,
+            fogFar: 175.0,
+        };
     }
 
     prepareBufferView(bufferView) {
@@ -217,6 +223,10 @@ export class Renderer {
         gl.uniform3fv(program.uniforms.uSpecularColor, light.specularColor);
 
         gl.uniform1f(program.uniforms.uShininess, light.shininess);
+
+        gl.uniform4fv(program.uniforms.uFogColor, this.fogSettings.fogColor);
+        gl.uniform1f(program.uniforms.uFogNear, this.fogSettings.fogNear);
+        gl.uniform1f(program.uniforms.uFogFar, this.fogSettings.fogFar);
 
         // Set camera projection matrix
         let projectionMatrix = mat4.clone(camera.camera.matrix);
