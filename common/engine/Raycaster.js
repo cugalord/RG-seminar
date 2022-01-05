@@ -177,18 +177,22 @@ export class Raycaster {
 	action(objectOrigin, objectHit) {
 		// Check if object hit is entity, and is not a powerup - thus being enemy or player
 		if (objectHit.isEntity && objectHit.isHealth === null) {
+			console.log("Action between: ", objectOrigin, objectHit);
 			// If object hit is player and origin of ray is enemy
 			if (
 				(objectHit == this.player.top || objectHit == this.player.bot) &&
 				objectOrigin != this.player.top
 			) {
+				console.log("Player hit");
 				let damage = 0;
 				for (let enemy of this.enemies) {
 					if (enemy.top == objectOrigin || enemy.bot == objectOrigin) {
-						damage = objectHit.damage;
+						damage = enemy.damage;
 						break;
 					}
 				}
+
+				console.log(damage);
 
 				this.player.reduceHealth(damage);
 				this.soundManager.playBounce();

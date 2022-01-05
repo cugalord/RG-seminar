@@ -39,6 +39,18 @@ export class Utils {
 		return forwardVector;
 	}
 
+	static calculateLookAt(objectFrom, objectTo) {
+		// Generate targetTo matrix (a matrix that makes one object point to another), based on
+		// positions two objects
+		const mat = mat4.targetTo(mat4.create(), objectFrom, objectTo, [0, 1, 0]);
+
+		// Extract rotation and adjust so object is pointing in correct rotation
+		let rot = mat4.getRotation(quat.create(), mat);
+		quat.rotateY(rot, rot, Utils.degToRad(90));
+
+		return rot;
+	}
+
 	static degToRad(degrees) {
 		return degrees * (Math.PI / 180);
 	}
