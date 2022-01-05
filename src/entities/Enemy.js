@@ -38,6 +38,8 @@ const pathNumberToIndexMap = {
 	1: 155,
 };
 
+const msFactor = 0.001;
+
 // Distance limits for enemies movements
 const brakingDistance = 10;
 const stoppingDistance = 2.5;
@@ -94,6 +96,14 @@ export class Enemy extends Entity {
 		this.lockOn = false;
 		this.rotating = false;
 
+		// Set variables needed for time calculations
+		this.time = Date.now();
+		this.startTime = this.time;
+		this.deltaTime = 0;
+
+		// Set shot as not occured yet
+		this.shot = false;
+
 		// Set references to player, raycaster and sound manager
 		this.player = null;
 		this.raycaster = null;
@@ -123,22 +133,35 @@ export class Enemy extends Entity {
 			// Check if player is close enough to generate lockon
 			this._getLockOn();
 
+			this.topRotation = Utils.calculateLookAt(
+				this.top.translation,
+				vec3.set(
+					vec3.create(),
+					this.player.bot.translation[0],
+					this.top.translation[1],
+					this.player.bot.translation[2]
+				)
+			);
+
 			if (this.lockOn) {
-				console.log("Lock");
-				this.topRotation = Utils.calculateLookAt(
-					this.top.translation,
-					vec3.set(
-						vec3.create(),
-						this.player.bot.translation[0],
-						this.top.translation[1],
-						this.player.bot.translation[2]
-					)
-				);
 				this._applyTopRotation();
 
-				if (this.topSlerpProgress > 0.8 && this.topSlerpProgress <= 1) {
-					console.log("Cast");
+				// Get time difference
+				this.time = Date.now();
+				this.deltaTime = (this.time - this.startTime) * msFactor;
+
+				// If time difference over 2 ms - allow shooting again
+				if (this.deltaTime > 2) {
+					this.shot = false;
+				}
+
+				if (this.topSlerpProgress > 0.9 && this.topSlerpProgress <= 1 && !this.shot) {
 					this.raycaster.cast(this.top, false);
+					this.topSlerpProgress = 0;
+
+					// Shot occured, reset start time
+					this.shot = true;
+					this.startTime = this.time;
 				}
 			}
 		}
@@ -234,7 +257,7 @@ export class Enemy extends Entity {
 		// If spherical linear interpolation not done yet
 		if (this.topSlerpProgress < 1) {
 			// Increase progress
-			this.topSlerpProgress += 0.1;
+			this.topSlerpProgress += 0.01;
 
 			// Perform spherical linear interpolation on bottom part's rotation
 			quat.slerp(
@@ -315,7 +338,7 @@ export class Enemy extends Entity {
 	}
 
 	_getLockOn() {
-		if (vec3.distance(this.bot.translation, this.player.bot.translation) < 15) {
+		if (vec3.distance(this.bot.translation, this.player.bot.translation) < 20) {
 			this.lockOn = true;
 		} else {
 			this.lockOn = false;

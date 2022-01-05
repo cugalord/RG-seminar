@@ -338,7 +338,7 @@ export class Player extends Entity {
 	addHealth(health) {
 		this.soundManager.playHealth();
 		// When adding health, clamp it to max value
-		this.health = Math.min(this.currHealth + health, this.maxHealth);
+		this.currHealth = Math.min(this.currHealth + health, this.maxHealth);
 	}
 
 	addAmmo(ammo) {
@@ -348,14 +348,13 @@ export class Player extends Entity {
 	}
 
 	reduceHealth(health) {
-		this.health -= health;
+		this.currHealth -= health;
 		this.soundManager.playBounce();
-		console.log("Health");
-		this.hud.setHealth(this.health, this.maxHealth);
+		this.hud.setHealth(this.currHealth, this.maxHealth);
 	}
 
 	getHealth() {
-		return this.health;
+		return this.currHealth;
 	}
 
 	setRaycaster(raycaster) {
