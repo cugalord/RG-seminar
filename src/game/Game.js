@@ -12,7 +12,7 @@ const gameStates = {
     EndScreen: 2,
 };
 
-const playerNoHealth = -1;
+const endGameFlag = -1;
 
 const msFactor = 0.001;
 
@@ -145,7 +145,7 @@ export class Game {
                 this.startTime = this.time;
 
                 // Update method returns -1 in case player runs ouf of heatlh - game over
-                if (this.mainGameComponent.update(dt) == playerNoHealth) {
+                if (this.mainGameComponent.update(dt) == endGameFlag) {
                     this.swapGameState();
                 }
                 break;

@@ -79,16 +79,23 @@ export class Enemy extends Entity {
 			velocity: [0, 0, 0],
 		};
 
-		// Set rotation quaternion to null, and current linear interpolation progress to 0
-		this.rot = null;
-		this.progress = 0;
+		// Set bottom goal rotation quaternion to null, and
+		// current bottom linear interpolation progress to 0
+		this.botRotation = null;
+		this.botSlerpProgress = 0;
+
+		// Set top goal rotation quaternion to null, and
+		// current top linear interpolation progress to 0
+		this.topRotation = null;
+		this.topSlerpProgress = 0;
 
 		// Set flags for destroyed, lockon and rotating
 		this.destroyed = false;
 		this.lockOn = false;
 		this.rotating = false;
 
-		// Set references to raycaster and sound manager
+		// Set references to player, raycaster and sound manager
+		this.player = null;
 		this.raycaster = null;
 		this.soundManager = soundManager;
 
@@ -110,7 +117,29 @@ export class Enemy extends Entity {
 			if (!this.rotating) {
 				this._applyMovement(dt);
 			} else {
-				this._applyRotation(dt);
+				this._applyBotRotation(dt);
+			}
+
+			// Check if player is close enough to generate lockon
+			this._getLockOn();
+
+			if (this.lockOn) {
+				console.log("Lock");
+				this.topRotation = Utils.calculateLookAt(
+					this.top.translation,
+					vec3.set(
+						vec3.create(),
+						this.player.bot.translation[0],
+						this.top.translation[1],
+						this.player.bot.translation[2]
+					)
+				);
+				this._applyTopRotation();
+
+				if (this.topSlerpProgress > 0.8 && this.topSlerpProgress <= 1) {
+					console.log("Cast");
+					this.raycaster.cast(this.top, false);
+				}
 			}
 		}
 	}
@@ -159,10 +188,13 @@ export class Enemy extends Entity {
 			this.nextNode = this._findAndSelectNeighbourNode();
 
 			// Get new rotation which points in the direction of next node
-			this.rot = this._calculateLookAt();
+			this.botRotation = Utils.calculateLookAt(
+				this.bot.translation,
+				this.nextNode.translation
+			);
 
 			// Start rotation
-			this.progress = 0;
+			this.botSlerpProgress = 0;
 			this.rotating = true;
 		}
 	}
@@ -177,14 +209,19 @@ export class Enemy extends Entity {
 		this.top.updateMatrix();
 	}
 
-	_applyRotation(dt) {
+	_applyBotRotation(dt) {
 		// If spherical linear interpolation not done yet
-		if (this.progress < 1) {
+		if (this.botSlerpProgress < 1) {
 			// Increase progress
-			this.progress += 0.007;
+			this.botSlerpProgress += 0.007;
 
 			// Perform spherical linear interpolation on bottom part's rotation
-			quat.slerp(this.bot.rotation, this.bot.rotation, this.rot, this.progress);
+			quat.slerp(
+				this.bot.rotation,
+				this.bot.rotation,
+				this.botRotation,
+				this.botSlerpProgress
+			);
 			this.bot.updateMatrix();
 		} else {
 			// If slerp done, set flag to false
@@ -193,7 +230,25 @@ export class Enemy extends Entity {
 		}
 	}
 
-	_rotateTop() {}
+	_applyTopRotation() {
+		// If spherical linear interpolation not done yet
+		if (this.topSlerpProgress < 1) {
+			// Increase progress
+			this.topSlerpProgress += 0.1;
+
+			// Perform spherical linear interpolation on bottom part's rotation
+			quat.slerp(
+				this.top.rotation,
+				this.top.rotation,
+				this.topRotation,
+				this.topSlerpProgress
+			);
+			this.top.updateMatrix();
+		} else {
+			// If slerp done, set flag to false
+			this.top.updateMatrix();
+		}
+	}
 
 	_findStartingNode() {
 		// Set closest node and minimum distance to infinity
@@ -259,21 +314,12 @@ export class Enemy extends Entity {
 		this.destroyedTop.updateTransform();
 	}
 
-	_calculateLookAt() {
-		// Generate targetTo matrix (a matrix that makes one object point to another), based on
-		// positions of tank and next node
-		const mat = mat4.targetTo(
-			mat4.create(),
-			this.bot.translation,
-			this.nextNode.translation,
-			[0, 1, 0]
-		);
-
-		// Extract rotation and adjust so object is pointing in correct rotation
-		let rot = mat4.getRotation(quat.create(), mat);
-		quat.rotateY(rot, rot, Utils.degToRad(90));
-
-		return rot;
+	_getLockOn() {
+		if (vec3.distance(this.bot.translation, this.player.bot.translation) < 15) {
+			this.lockOn = true;
+		} else {
+			this.lockOn = false;
+		}
 	}
 
 	reduceHealth(damage) {
@@ -290,6 +336,12 @@ export class Enemy extends Entity {
 
 	setRaycaster(raycaster) {
 		this.raycaster = raycaster;
+	}
+
+	setPlayer(player) {
+		// Setting player reference is needed so we know it's position, which is used in calculating
+		// when lockOn occurs
+		this.player = player;
 	}
 
 	getDestroyed() {

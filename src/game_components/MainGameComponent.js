@@ -113,16 +113,8 @@ export class MainGameComponent {
 	update(dt) {
 		// If tank's bottom, top part and camera are loaded - this check is needed due to the asynchronous
 		// nature of the init method
-		if (
-			this.tankBot &&
-			this.tankTop &&
-			this.camera &&
-			this.player &&
-			this.light &&
-			this.enemies[0]
-		) {
+		if (this.tankBot && this.tankTop && this.camera && this.player && this.light) {
 			this._simulateLightning(dt);
-
 			this.physics.update(dt);
 
 			// If player is dead
@@ -130,25 +122,13 @@ export class MainGameComponent {
 				return -1;
 			}
 
-			let all = true;
-			for (let i = 0; i < this.tanksDestroyed.length; i++) {
-				if (this.tanksDestroyed[i] == false) {
-					all = false;
-					break;
-				}
-			}
-
-			//console.log(this.enemiesDestroyed);
-
-			if (all) {
-				console.log(this.tanksDestroyed);
+			// Check if all enemies are dead
+			if (this._checkDeadEnemies()) {
 				return -1;
 			}
 
-			// Check if enemies are destroyed
-			for (let i = 0; i < this.enemies.length; i++) {
-				this.tanksDestroyed[i] = this.enemies[i].getDestroyed();
-			}
+			// Check how many enemies are defeated
+			this._checkEnemyStatus();
 
 			// Update all entities in the game
 			this.entityManager.update(dt);
@@ -223,6 +203,7 @@ export class MainGameComponent {
 
 		for (let i = 0; i < this.enemies.length; i++) {
 			this.enemies[i].setRaycaster(this.raycaster);
+			this.enemies[i].setPlayer(this.player);
 		}
 
 		// Prepare current scene
@@ -424,5 +405,23 @@ export class MainGameComponent {
 				}
 			}
 		}
+	}
+
+	_checkEnemyStatus() {
+		// Check if enemies are destroyed
+		for (let i = 0; i < this.enemies.length; i++) {
+			this.tanksDestroyed[i] = this.enemies[i].getDestroyed();
+		}
+	}
+
+	_checkDeadEnemies() {
+		let all = true;
+		for (let i = 0; i < this.tanksDestroyed.length; i++) {
+			if (this.tanksDestroyed[i] == false) {
+				all = false;
+				break;
+			}
+		}
+		return all;
 	}
 }

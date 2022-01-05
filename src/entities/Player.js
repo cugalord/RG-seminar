@@ -350,6 +350,8 @@ export class Player extends Entity {
 	reduceHealth(health) {
 		this.health -= health;
 		this.soundManager.playBounce();
+		console.log("Health");
+		this.hud.setHealth(this.health, this.maxHealth);
 	}
 
 	getHealth() {
