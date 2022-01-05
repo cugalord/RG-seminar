@@ -123,6 +123,8 @@ export class Game {
         this.mainGameComponent.setMenuManager(this.menuManager);
         this.mainGameComponent.setSoundManager(this.soundManager);
 
+        this.endGameComponent.setSoundManager(this.soundManager);
+
         // Start time counter
         this.time = Date.now();
         this.startTime = this.time;

@@ -26,6 +26,8 @@ export class EndGameComponent {
 
 		// No HUD exits yet
 		this.hud = null;
+
+		this.soundManager = null;
 	}
 
 	async init() {
@@ -58,8 +60,26 @@ export class EndGameComponent {
 		// Load needed variables and initialize hud
 		this.tanksDestroyed = tanksDestroyed;
 
+		let all = true;
+
+		for (let i = 0; i < this.tanksDestroyed.length; i++) {
+			if (this.tanksDestroyed[i] == false) {
+				all = false;
+			}
+		}
+
+		if (all) {
+			this.soundManager.playVictory();
+		} else {
+			this.soundManager.playLoss();
+		}
+
 		this.hud = new HUDEnd(this.tanksDestroyed);
 		this.hud.init();
+	}
+
+	setSoundManager(soundManager) {
+		this.soundManager = soundManager;
 	}
 
 	update() {

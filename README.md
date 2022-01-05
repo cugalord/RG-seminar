@@ -27,6 +27,9 @@ The project is structured as follows:
   - The `sounds` directory contains sounds used in the Sound Manager implementation.  
 - The `src` directory contains all the code that provides the functionality of 
   the program.
+  - The `DEBUG` directory contains code that was used to debug certain parts of
+    code. It mainly contains different sliders and menu options and instructions
+    for how to include them in your code.
   - The `entities` directory contains implementations of player and enemies.
   - The `game` directory contains the implementation of the main Game class.
   - The `game_components` directory contains implementations of specific

@@ -8,6 +8,8 @@ export class SoundManager {
 		this.health = new Audio("../../common/sounds/heal.mp3");
 		this.boom = new Audio("../../common/sounds/boom.mp3");
 		this.bounce = new Audio("../../common/sounds/bounce.mp3");
+		this.victory = new Audio("../../common/sounds/victory.mp3");
+		this.loss = new Audio("../../common/sounds/sadge.mp3");
 
 		this.drive.volume = 0.2;
 		this.shot.volume = 0.3;
@@ -17,6 +19,8 @@ export class SoundManager {
 		this.health.volume = 0.3;
 		this.boom.volume = 0.6;
 		this.bounce.volume = 0.5;
+		this.victory.volume = 0.7;
+		this.loss.volume = 0.7;
 
 		this.drive.addEventListener("ended", this.playDrive, false);
 	}
@@ -55,6 +59,14 @@ export class SoundManager {
 		this.bounce.play();
 	}
 
+	playVictory() {
+		this.victory.play();
+	}
+
+	playLoss() {
+		this.loss.play();
+	}
+
 	pause() {
 		this.drive.volume = 0;
 		this.shot.volume = 0;
@@ -64,6 +76,8 @@ export class SoundManager {
 		this.health.volume = 0;
 		this.bounce.volume = 0;
 		this.boom.volume = 0;
+		this.victory.volume = 0;
+		this.loss.volume = 0;
 	}
 
 	unpause() {
@@ -75,6 +89,8 @@ export class SoundManager {
 		this.health.volume = 0.3;
 		this.bounce.volume = 0.5;
 		this.boom.volume = 0.6;
+		this.victory.volume = 0.7;
+		this.loss.volume = 0.7;
 	}
 
 	setPathToAudio(pathToAudio) {
