@@ -61,7 +61,7 @@ export class HUDGame extends HUD {
 	}
 
 	setHealth(health, maxHealth) {
-		this.health = (health * 100) / maxHealth;
+		this.health = Math.ceil((health * 100) / maxHealth);
 		this.healthTextContainer.innerText = this.health + "%";
 	}
 

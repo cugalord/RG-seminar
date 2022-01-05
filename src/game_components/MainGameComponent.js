@@ -204,6 +204,7 @@ export class MainGameComponent {
 		for (let i = 0; i < this.enemies.length; i++) {
 			this.enemies[i].setRaycaster(this.raycaster);
 			this.enemies[i].setPlayer(this.player);
+			this.enemies[i].setEnemies(this.enemies);
 		}
 
 		// Prepare current scene

@@ -351,12 +351,11 @@ export class Enemy extends Entity {
 		let neighbours = this._getNodeInfoFromId(this.currentNode.id);
 		neighbours.splice(0, 1);
 
-		console.log(neighbours);
-
 		let bannedNodes = new Array();
 		let nodeKey = 0;
 
 		if (this.enemies) {
+			//console.log("Here");
 			for (let i = 0; i < this.enemies.length; i++) {
 				if (i != this.id) {
 					const nodes = this.enemies[i].getCurrentAndNextNode();
@@ -382,7 +381,6 @@ export class Enemy extends Entity {
 
 					for (let j = 0; j < neighbours.length; j++) {
 						if (parseInt(neighbours[j]) == nodeKey) {
-							console.log("Found next");
 							neighbours.splice(j, 1);
 							break;
 						}
