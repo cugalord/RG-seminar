@@ -21,7 +21,7 @@ export class Renderer {
         this.fogSettings = {
             fogColor: [0.8, 0.9, 1, 1],
             fogNear: 1.1,
-            fogFar: 175.0,
+            fogFar: 200.0,
         };
     }
 
