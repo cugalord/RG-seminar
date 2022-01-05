@@ -143,9 +143,9 @@ export class Enemy extends Entity {
 				)
 			);
 
-			if (this.lockOn) {
-				this._applyTopRotation();
+			this._applyTopRotation();
 
+			if (this.lockOn) {
 				// Get time difference
 				this.time = Date.now();
 				this.deltaTime = (this.time - this.startTime) * msFactor;
@@ -270,6 +270,7 @@ export class Enemy extends Entity {
 		} else {
 			// If slerp done, set flag to false
 			this.top.updateMatrix();
+			this.topSlerpProgress = 0;
 		}
 	}
 
