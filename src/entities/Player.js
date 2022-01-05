@@ -19,7 +19,7 @@ export class Player extends Entity {
 
 		// Set presets for 3 different tanks - each has it's own properties
 		this.presets = [
-			[100, 1, 100],
+			[100, 1, 10],
 			[75, 2, 8],
 			[200, 0.5, 20],
 		];

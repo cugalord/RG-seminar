@@ -145,10 +145,12 @@ export class Enemy extends Entity {
 		if (!this.destroyed && document.pointerLockElement !== document.getElementById("canvas")) {
 			// If tank should be rotating when it reaches an intersection, rotate it, otherwise
 			// move it forward
-			if (!this.rotating && !this.wait) {
-				this._applyMovement(dt);
-			} else {
-				this._applyBotRotation(dt);
+			if (!this.wait) {
+				if (!this.rotating) {
+					this._applyMovement(dt);
+				} else {
+					this._applyBotRotation(dt);
+				}
 			}
 
 			// Check if player is close enough to generate lockon
@@ -264,19 +266,21 @@ export class Enemy extends Entity {
 			this.previousNode = tmp;
 			this.nextNode = this._findAndSelectNeighbourNode();
 
-			// Get new rotation which points in the direction of next node
-			this.botRotation = Utils.calculateLookAt(
-				this.bot.translation,
-				this.nextNode.translation
-			);
+			if (!this.wait) {
+				// Get new rotation which points in the direction of next node
+				this.botRotation = Utils.calculateLookAt(
+					this.bot.translation,
+					this.nextNode.translation
+				);
 
-			if (this.id == 1) {
-				quat.rotateY(this.botRotation, this.botRotation, Utils.degToRad(-180));
+				if (this.id == 1) {
+					quat.rotateY(this.botRotation, this.botRotation, Utils.degToRad(-180));
+				}
+
+				// Start rotation
+				this.botSlerpProgress = 0;
+				this.rotating = true;
 			}
-
-			// Start rotation
-			this.botSlerpProgress = 0;
-			this.rotating = true;
 		}
 	}
 
@@ -390,6 +394,8 @@ export class Enemy extends Entity {
 
 		if (neighbours.length == 0) {
 			this.wait = true;
+			this.nextNode = this.previousNode;
+			return this.currentNode;
 		} else {
 			this.wait = false;
 		}
