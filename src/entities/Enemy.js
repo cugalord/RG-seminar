@@ -355,7 +355,6 @@ export class Enemy extends Entity {
 		let nodeKey = 0;
 
 		if (this.enemies) {
-			//console.log("Here");
 			for (let i = 0; i < this.enemies.length; i++) {
 				if (i != this.id) {
 					const nodes = this.enemies[i].getCurrentAndNextNode();

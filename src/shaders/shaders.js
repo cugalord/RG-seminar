@@ -21,6 +21,8 @@ out vec3 vNormal;
 
 out float vAttenuation;
 
+out float vFogDepth;
+
 void main() {
     // Calculate vertex and light position based on camera coordinates
     vec3 vertexPosition = (uViewModel * vec4(aPosition, 1)).xyz;
@@ -36,6 +38,9 @@ void main() {
 
     // Move texture coords to a varying
     vTexCoord = aTexCoord;
+
+    // Calculate fog depth based on model position relative to camera
+    vFogDepth = -(uViewModel * vec4(aPosition, 1)).z;
 
     // Move homogenized vertex to position based on projection matrix
     gl_Position = uProjection * vec4(vertexPosition, 1);
@@ -55,6 +60,10 @@ uniform vec3 uSpecularColor;
 
 uniform float uShininess;
 
+uniform vec4 uFogColor;
+uniform float uFogNear;
+uniform float uFogFar;
+
 // Define needed varyings (inputs of fragment shader)
 in vec3 vEye;
 in vec3 vLight;
@@ -63,6 +72,8 @@ in vec3 vNormal;
 in vec2 vTexCoord;
 
 in float vAttenuation;
+
+in float vFogDepth;
 
 // Define fragment shader output
 out vec4 oColor;
@@ -81,8 +92,11 @@ void main() {
     // Calculate light color
     vec3 light = (uAmbientColor + (uDiffuseColor * lambertReflect) + (uSpecularColor * phongReflect)) * vAttenuation;
 
-    // Calculate texture color based on texture and light
-    oColor = texture(uTexture, vTexCoord) * vec4(light, 1);
+    // Calculate amount of fog on object
+    float fogAmount = smoothstep(uFogNear, uFogFar, vFogDepth);
+
+    // Calculate texture color based on texture, light and fog
+    oColor = mix(texture(uTexture, vTexCoord) * vec4(light, 1), uFogColor, fogAmount);
 }
 `;
 
