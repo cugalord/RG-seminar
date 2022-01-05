@@ -9,16 +9,24 @@ export class HUDEnd extends HUD {
 		this.endTextContainer = document.createElement("p");
 		this.endText = document.createTextNode("");
 		this.endTextContainer.appendChild(this.endText);
+
+		this.tanksDestroyedCounter = 0;
+
+		for (let i = 0; i < this.tanksDestroyed.length; i++) {
+			if (this.tanksDestroyed[i] == true) {
+				this.tanksDestroyedCounter++;
+			}
+		}
 	}
 
 	init() {
 		// If all tanks were destroyed display victory text, otherwise loss text
-		if (this.tanksDestroyed === 3) {
+		if (this.tanksDestroyedCounter === 3) {
 			this.endTextContainer.innerText =
-				"YOU WON\nYOU DESTROYED " + this.tanksDestroyed + "/3 TANKS";
+				"YOU WON\nYOU DESTROYED " + this.tanksDestroyedCounter + "/3 TANKS";
 		} else {
 			this.endTextContainer.innerText =
-				"YOU LOST\nYOU DESTROYED " + this.tanksDestroyed + "/3 TANKS";
+				"YOU LOST\nYOU DESTROYED " + this.tanksDestroyedCounter + "/3 TANKS";
 		}
 
 		// Set properties of end game text

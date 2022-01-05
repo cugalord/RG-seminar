@@ -46,9 +46,6 @@ export class MainGameComponent {
 
 		// Set reference to global sound manager object as null
 		this.soundManager = null;
-
-		// Set counter of enemies destroyed - used to check if game was won or lost
-		this.tanksDestroyed = 0;
 	}
 
 	async init() {
@@ -97,9 +94,12 @@ export class MainGameComponent {
 		// Create empty player variable
 		this.player = null;
 
+		// Create empty raycaster and physics variables
 		this.raycaster = null;
-
 		this.physics = null;
+
+		// Set array of flags of enemies destroyed - used to check if game was won or lost
+		this.tanksDestroyed = [false, false, false];
 
 		// Create new instance of entity manager - it manages the logic of all entities and contains
 		// it so it doesn't pollute main classes
@@ -113,7 +113,14 @@ export class MainGameComponent {
 	update(dt) {
 		// If tank's bottom, top part and camera are loaded - this check is needed due to the asynchronous
 		// nature of the init method
-		if (this.tankBot && this.tankTop && this.camera && this.player && this.light) {
+		if (
+			this.tankBot &&
+			this.tankTop &&
+			this.camera &&
+			this.player &&
+			this.light &&
+			this.enemies[0]
+		) {
 			this._simulateLightning(dt);
 
 			this.physics.update(dt);
@@ -121,6 +128,26 @@ export class MainGameComponent {
 			// If player is dead
 			if (this.player.getHealth() <= 0) {
 				return -1;
+			}
+
+			let all = true;
+			for (let i = 0; i < this.tanksDestroyed.length; i++) {
+				if (this.tanksDestroyed[i] == false) {
+					all = false;
+					break;
+				}
+			}
+
+			//console.log(this.enemiesDestroyed);
+
+			if (all) {
+				console.log(this.tanksDestroyed);
+				return -1;
+			}
+
+			// Check if enemies are destroyed
+			for (let i = 0; i < this.enemies.length; i++) {
+				this.tanksDestroyed[i] = this.enemies[i].getDestroyed();
 			}
 
 			// Update all entities in the game
@@ -188,11 +215,15 @@ export class MainGameComponent {
 		this.player.enable();
 
 		// Create new physics engine
-		this.physics = new Physics(this.scene, this.player);
+		this.physics = new Physics(this.scene, this.player, this.enemies);
 
 		this.raycaster = new Raycaster(this.scene, this.player, this.enemies, this.soundManager);
 
 		this.player.setRaycaster(this.raycaster);
+
+		for (let i = 0; i < this.enemies.length; i++) {
+			this.enemies[i].setRaycaster(this.raycaster);
+		}
 
 		// Prepare current scene
 		this.renderer.prepareScene(this.scene);
@@ -295,7 +326,6 @@ export class MainGameComponent {
 			enemyTop.isEntity = true;
 			enemyBot.isEntity = true;
 
-			
 			let enemyTopDestroyed = await this.loader.loadNode("enemy." + (i + 1) + ".top.dead");
 			let enemyBotDestroyed = await this.loader.loadNode("enemy." + (i + 1) + ".bot.dead");
 			enemyTopDestroyed.isEntity = true;
@@ -306,9 +336,20 @@ export class MainGameComponent {
 
 			console.log(enemyTopDestroyed.id, "destenemy." + (i + 1) + ".top");
 			console.log(enemyBotDestroyed.id, "destenemy." + (i + 1) + ".bot");
-			
-			this.enemies.push(new Enemy(i != 2 ? 1 : 0, enemyTop, enemyBot, this.pathPositions, this.soundManager, enemyTopDestroyed, enemyBotDestroyed));
-			this.enemiesDestroyed.push([enemyTopDestroyed.clone(), enemyBotDestroyed.clone()]);
+
+			this.enemies.push(
+				new Enemy(
+					i != 2 ? 1 : 0,
+					enemyTop,
+					enemyBot,
+					this.pathPositions,
+					this.soundManager,
+					enemyTopDestroyed,
+					enemyBotDestroyed,
+					this.camera
+				)
+			);
+			this.enemiesDestroyed.push([enemyTopDestroyed, enemyBotDestroyed]);
 		}
 	}
 

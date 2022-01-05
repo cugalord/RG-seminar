@@ -19,12 +19,12 @@ export class Player extends Entity {
 
 		// Set presets for 3 different tanks - each has it's own properties
 		this.presets = [
-			[100, 1, 10],
+			[100, 1, 100],
 			[75, 2, 8],
 			[200, 0.5, 20],
 		];
 
-		// Select properties based on preset
+		// Set properties based on preset
 		this.maxHealth = this.presets[preset][0];
 		this.speed = this.presets[preset][1];
 		this.damage = this.presets[preset][2];

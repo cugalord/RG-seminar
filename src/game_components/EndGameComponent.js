@@ -22,7 +22,7 @@ export class EndGameComponent {
 		this.gl = gl;
 
 		// No tanks were destroyed
-		this.tanksDestroyed = 0;
+		this.tanksDestroyed = [false, false, false];
 
 		// No HUD exits yet
 		this.hud = null;
@@ -53,6 +53,8 @@ export class EndGameComponent {
 	}
 
 	load(tanksDestroyed) {
+		document.exitPointerLock();
+
 		// Load needed variables and initialize hud
 		this.tanksDestroyed = tanksDestroyed;
 

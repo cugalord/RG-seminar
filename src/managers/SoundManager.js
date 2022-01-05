@@ -15,7 +15,7 @@ export class SoundManager {
 		this.shotEmpty.volume = 1;
 		this.ammo.volume = 1;
 		this.health.volume = 0.3;
-		this.boom.volume = 0.8;
+		this.boom.volume = 0.6;
 		this.bounce.volume = 0.5;
 
 		this.drive.addEventListener("ended", this.playDrive, false);
@@ -63,6 +63,7 @@ export class SoundManager {
 		this.ammo.volume = 0;
 		this.health.volume = 0;
 		this.bounce.volume = 0;
+		this.boom.volume = 0;
 	}
 
 	unpause() {
@@ -73,6 +74,7 @@ export class SoundManager {
 		this.ammo.volume = 1;
 		this.health.volume = 0.3;
 		this.bounce.volume = 0.5;
+		this.boom.volume = 0.6;
 	}
 
 	setPathToAudio(pathToAudio) {
