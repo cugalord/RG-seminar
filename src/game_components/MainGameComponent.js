@@ -327,7 +327,7 @@ export class MainGameComponent {
 					this.soundManager,
 					enemyTopDestroyed,
 					enemyBotDestroyed,
-					this.camera
+					i
 				)
 			);
 			this.enemiesDestroyed.push([enemyTopDestroyed, enemyBotDestroyed]);

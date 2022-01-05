@@ -44,10 +44,22 @@ const msFactor = 0.001;
 const brakingDistance = 10;
 const stoppingDistance = 2.5;
 
+// Lower and upper bound of slerp progress - used to determine when shot can occur
+const slerpShotLowerLimit = 0.9;
+const slerpShotUpperLimit = 1;
+
+// Variables that set how fast linear interpolation occurs
+const bottomSlerpIncrement = 0.007;
+const topSlerpIncrement = 0.01;
+
+const lockOnDistance = 20;
+
 export class Enemy extends Entity {
-	constructor(preset, top, bot, pathNodes, soundManager, destroyedTop, destroyedBot) {
+	constructor(preset, top, bot, pathNodes, soundManager, destroyedTop, destroyedBot, id) {
 		// Explicity call constructor of parent class
 		super();
+
+		this.id = id;
 
 		// Set references to tank's bottom and top part
 		this.top = top;
@@ -95,6 +107,7 @@ export class Enemy extends Entity {
 		this.destroyed = false;
 		this.lockOn = false;
 		this.rotating = false;
+		this.wait = false;
 
 		// Set variables needed for time calculations
 		this.time = Date.now();
@@ -106,6 +119,7 @@ export class Enemy extends Entity {
 
 		// Set references to player, raycaster and sound manager
 		this.player = null;
+		this.enemies = null;
 		this.raycaster = null;
 		this.soundManager = soundManager;
 
@@ -116,15 +130,22 @@ export class Enemy extends Entity {
 		this.currentNode = this._findStartingNode();
 
 		// Set previous and next node
-		this.previousNode = this.current_node;
+		this.previousNode = this.currentNode;
 		this.nextNode = this._findAndSelectNeighbourNode();
+
+		// Needed to make largest tank look at his next node
+		if (this.id == 2) {
+			let tmpRot = Utils.calculateLookAt(this.bot.translation, this.nextNode.translation);
+			this.bot.rotation = tmpRot;
+			this.bot.updateMatrix();
+		}
 	}
 
 	update(dt) {
 		if (!this.destroyed && document.pointerLockElement !== document.getElementById("canvas")) {
 			// If tank should be rotating when it reaches an intersection, rotate it, otherwise
 			// move it forward
-			if (!this.rotating) {
+			if (!this.rotating && !this.wait) {
 				this._applyMovement(dt);
 			} else {
 				this._applyBotRotation(dt);
@@ -143,6 +164,10 @@ export class Enemy extends Entity {
 				)
 			);
 
+			if (this.id == 1) {
+				quat.rotateY(this.topRotation, this.topRotation, Utils.degToRad(-180));
+			}
+
 			this._applyTopRotation();
 
 			if (this.lockOn) {
@@ -155,8 +180,12 @@ export class Enemy extends Entity {
 					this.shot = false;
 				}
 
-				if (this.topSlerpProgress > 0.9 && this.topSlerpProgress <= 1 && !this.shot) {
-					this.raycaster.cast(this.top, false);
+				if (
+					this.topSlerpProgress > slerpShotLowerLimit &&
+					this.topSlerpProgress <= slerpShotUpperLimit &&
+					!this.shot
+				) {
+					this.raycaster.cast(this.top, false, this.id);
 					this.topSlerpProgress = 0;
 
 					// Shot occured, reset start time
@@ -164,12 +193,37 @@ export class Enemy extends Entity {
 					this.startTime = this.time;
 				}
 			}
+
+			if (this.wait) {
+				let tmp = this.currentNode;
+				this.currentNode = this.nextNode;
+				this.previousNode = tmp;
+				this.nextNode = this._findAndSelectNeighbourNode();
+
+				// Get new rotation which points in the direction of next node
+				this.botRotation = Utils.calculateLookAt(
+					this.bot.translation,
+					this.nextNode.translation
+				);
+
+				if (this.id == 1) {
+					quat.rotateY(this.botRotation, this.botRotation, Utils.degToRad(-180));
+				}
+
+				// Start rotation
+				this.botSlerpProgress = 0;
+				this.rotating = true;
+			}
 		}
 	}
 
 	_applyMovement(dt) {
 		// Get forward vector of bottom part
-		const forward = Utils.getForward(this.bot, false);
+		let forward = Utils.getForward(this.bot, false);
+
+		if (this.id == 1) {
+			vec3.negate(forward, forward);
+		}
 
 		// 1: add movement acceleration & rotation
 		let acc = vec3.create();
@@ -216,6 +270,10 @@ export class Enemy extends Entity {
 				this.nextNode.translation
 			);
 
+			if (this.id == 1) {
+				quat.rotateY(this.botRotation, this.botRotation, Utils.degToRad(-180));
+			}
+
 			// Start rotation
 			this.botSlerpProgress = 0;
 			this.rotating = true;
@@ -236,7 +294,7 @@ export class Enemy extends Entity {
 		// If spherical linear interpolation not done yet
 		if (this.botSlerpProgress < 1) {
 			// Increase progress
-			this.botSlerpProgress += 0.007;
+			this.botSlerpProgress += bottomSlerpIncrement;
 
 			// Perform spherical linear interpolation on bottom part's rotation
 			quat.slerp(
@@ -257,7 +315,7 @@ export class Enemy extends Entity {
 		// If spherical linear interpolation not done yet
 		if (this.topSlerpProgress < 1) {
 			// Increase progress
-			this.topSlerpProgress += 0.01;
+			this.topSlerpProgress += topSlerpIncrement;
 
 			// Perform spherical linear interpolation on bottom part's rotation
 			quat.slerp(
@@ -292,6 +350,52 @@ export class Enemy extends Entity {
 		// Get neighbours of current node and remove first neighbour, which is this node
 		let neighbours = this._getNodeInfoFromId(this.currentNode.id);
 		neighbours.splice(0, 1);
+
+		console.log(neighbours);
+
+		let bannedNodes = new Array();
+		let nodeKey = 0;
+
+		if (this.enemies) {
+			for (let i = 0; i < this.enemies.length; i++) {
+				if (i != this.id) {
+					const nodes = this.enemies[i].getCurrentAndNextNode();
+
+					if (nodes.next == this.currentNode.id) {
+						console.log("Next is current");
+						nodeKey = Object.keys(pathNumberToIndexMap).find(
+							(key) => pathNumberToIndexMap[key] === nodes.current
+						);
+
+						for (let j = 0; j < neighbours.length; j++) {
+							if (parseInt(neighbours[j]) == nodeKey) {
+								console.log("Found current");
+								neighbours.splice(j, 1);
+								break;
+							}
+						}
+					}
+
+					nodeKey = nodeKey = Object.keys(pathNumberToIndexMap).find(
+						(key) => pathNumberToIndexMap[key] === nodes.next
+					);
+
+					for (let j = 0; j < neighbours.length; j++) {
+						if (parseInt(neighbours[j]) == nodeKey) {
+							console.log("Found next");
+							neighbours.splice(j, 1);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if (neighbours.length == 0) {
+			this.wait = true;
+		} else {
+			this.wait = false;
+		}
 
 		// Select random node
 		const randomNode = Math.floor(Math.random() * neighbours.length);
@@ -339,7 +443,7 @@ export class Enemy extends Entity {
 	}
 
 	_getLockOn() {
-		if (vec3.distance(this.bot.translation, this.player.bot.translation) < 20) {
+		if (vec3.distance(this.bot.translation, this.player.bot.translation) < lockOnDistance) {
 			this.lockOn = true;
 		} else {
 			this.lockOn = false;
@@ -368,7 +472,19 @@ export class Enemy extends Entity {
 		this.player = player;
 	}
 
+	setEnemies(enemies) {
+		this.enemies = enemies;
+	}
+
 	getDestroyed() {
 		return this.destroyed;
+	}
+
+	getCurrentAndNextNode() {
+		return {
+			previous: this.previousNode.id,
+			current: this.currentNode.id,
+			next: this.nextNode.id,
+		};
 	}
 }
