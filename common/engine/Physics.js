@@ -1,11 +1,12 @@
 import { vec3, mat4, quat, vec4, mat3 } from "../../lib/gl-matrix-module.js";
 
 export class Physics {
-    constructor(scene, player) {
+    constructor(scene, player, enemies) {
         // Set references to needed nodes
         this.scene = scene;
         this.player = player;
         this.camera = this.player.camera;
+        this.enemies = enemies;
     }
 
     update(dt) {
@@ -182,6 +183,16 @@ export class Physics {
         if (a != this.player.top) {
             vec3.add(a.translation, a.translation, minDirection);
             a.updateMatrix();
+        }
+
+        for (let i = 0; i < this.enemies.length; i++) {
+            if (
+                (a == this.enemies[i].top && b != this.enemies[i].bot) ||
+                (a == this.enemies[i].bot && b != this.enemies[i].top)
+            ) {
+                this.enemies[i].defaults.velocity = [0, 0, 0];
+                break;
+            }
         }
 
         // If powerup node was hit, increase appropriate statistic

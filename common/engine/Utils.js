@@ -38,4 +38,12 @@ export class Utils {
 
 		return forwardVector;
 	}
+
+	static degToRad(degrees) {
+		return degrees * (Math.PI / 180);
+	}
+
+	static radToDeg(radians) {
+		return radians * (180 / Math.PI);
+	}
 }
