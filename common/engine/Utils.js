@@ -44,7 +44,7 @@ export class Utils {
 		// positions two objects
 		const mat = mat4.targetTo(mat4.create(), objectFrom, objectTo, [0, 1, 0]);
 
-		// Extract rotation and adjust so object is pointing in correct rotation
+		// Extract rotation and adjust so object is pointing in correct direction
 		let rot = mat4.getRotation(quat.create(), mat);
 		quat.rotateY(rot, rot, Utils.degToRad(90));
 

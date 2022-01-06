@@ -161,7 +161,7 @@ export class Physics {
             // If node a is bottom part of tank, move only camera as top will be moved with top
             // due to their parent - child relationship
 
-            // Stop any movement occuring
+            // Stop any movement from occuring
             this.player.defaults.velocity = [0, 0, 0];
 
             vec3.add(this.player.camera.translation, this.player.camera.translation, minDirection);
@@ -185,6 +185,8 @@ export class Physics {
             a.updateMatrix();
         }
 
+        // Check if collision between enemy and object occured, exclude collision between top and
+        // bottom part - if collision occured, stop movement
         for (let i = 0; i < this.enemies.length; i++) {
             if (
                 (a == this.enemies[i].top && b != this.enemies[i].bot) ||

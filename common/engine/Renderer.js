@@ -224,6 +224,7 @@ export class Renderer {
 
         gl.uniform1f(program.uniforms.uShininess, light.shininess);
 
+        // Set uniforms of fog
         gl.uniform4fv(program.uniforms.uFogColor, this.fogSettings.fogColor);
         gl.uniform1f(program.uniforms.uFogNear, this.fogSettings.fogNear);
         gl.uniform1f(program.uniforms.uFogFar, this.fogSettings.fogFar);

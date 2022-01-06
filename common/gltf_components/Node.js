@@ -25,8 +25,11 @@ export class Node {
             child.parent = this;
         }
         this.parent = null;
+
+        // Set id to null, it is added on load
         this.id = null;
 
+        // Set flags for entity and health powerup
         this.isEntity = false;
         this.isHealth = null;
     }
