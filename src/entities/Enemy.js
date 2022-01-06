@@ -38,6 +38,7 @@ const pathNumberToIndexMap = {
 	1: 155,
 };
 
+// Factor to convert time to miliseconds
 const msFactor = 0.001;
 
 // Distance limits for enemies movements
@@ -392,6 +393,7 @@ export class Enemy extends Entity {
 			}
 		}
 
+		// If no neighbour found, stay at current node
 		if (neighbours.length == 0) {
 			this.wait = true;
 			this.nextNode = this.previousNode;
@@ -446,6 +448,7 @@ export class Enemy extends Entity {
 	}
 
 	_getLockOn() {
+		// Check if player close enough for lock on
 		if (vec3.distance(this.bot.translation, this.player.bot.translation) < lockOnDistance) {
 			this.lockOn = true;
 		} else {

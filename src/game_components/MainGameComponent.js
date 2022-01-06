@@ -183,9 +183,7 @@ export class MainGameComponent {
 			this.tankTop,
 			this.camera,
 			this.hud,
-			this.soundManager,
-			this.bullet,
-			this.scene
+			this.soundManager
 		);
 
 		// Initialize entity manager with arrays of entities
@@ -312,12 +310,6 @@ export class MainGameComponent {
 			let enemyBotDestroyed = await this.loader.loadNode("enemy." + (i + 1) + ".bot.dead");
 			enemyTopDestroyed.isEntity = true;
 			enemyBotDestroyed.isEntity = true;
-
-			console.log(enemyTop.id, "enemy." + (i + 1) + ".top");
-			console.log(enemyBot.id, "enemy." + (i + 1) + ".bot");
-
-			console.log(enemyTopDestroyed.id, "destenemy." + (i + 1) + ".top");
-			console.log(enemyBotDestroyed.id, "destenemy." + (i + 1) + ".bot");
 
 			this.enemies.push(
 				new Enemy(

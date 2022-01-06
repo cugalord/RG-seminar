@@ -13,7 +13,7 @@ const minDistance = 0;
 const scrollScale = 0.01;
 
 export class Player extends Entity {
-	constructor(preset, bot, top, camera, hud, soundManager, bullet, scene) {
+	constructor(preset, bot, top, camera, hud, soundManager) {
 		// Explicity call constructor of parent class
 		super();
 
@@ -75,9 +75,6 @@ export class Player extends Entity {
 		this.soundManager = soundManager;
 
 		this.distanceCovered = 0;
-
-		this.bulletModel = bullet;
-		this.scene = scene;
 
 		this.spawnedBullet = null;
 		this.bulletSpeed = 20;
